@@ -1,0 +1,7 @@
+model,language,total_tasks,execution_success_rate,pass_at_1_rate,avg_generation_time_s,avg_peak_memory_mb
+deepseek-coder:6.7b-instruct,java,20,100.0,95.0,10.133,0.9
+deepseek-coder:6.7b-instruct,python,20,100.0,95.0,6.749,11.78
+qwen2.5-coder:7b,java,20,100.0,95.0,8.697,0.9
+qwen2.5-coder:7b,python,20,100.0,95.0,6.382,11.84
+starcoder2:7b,java,20,5.0,0.0,3.214,0.06
+starcoder2:7b,python,20,20.0,5.0,12.919,2.33
