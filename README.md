@@ -232,6 +232,85 @@ python main.py --output-dir my_results/
 
 ---
 
+## Results
+
+> Full data: [results/evaluation_detailed.csv](results/evaluation_detailed.csv) · [results/evaluation_summary.csv](results/evaluation_summary.csv)
+
+### Overall Performance (40 tasks — 20 Python + 20 Java)
+
+| Model | Exec. Success | Pass@1 | Avg. Gen. Time | Python Mem |
+|---|---|---|---|---|
+| `qwen2.5-coder:7b` | **90.0%** | **85.0%** | **11.41 s** | ~11.86 MB |
+| `deepseek-coder:6.7b-instruct` | **90.0%** | **85.0%** | 17.28 s | ~11.82 MB |
+| `starcoder2:instruct` | **90.0%** | **85.0%** | 55.50 s | ~11.78 MB |
+
+All three models achieve the same overall correctness (85% pass@1). The decisive differentiator is **generation speed**: `qwen2.5-coder:7b` is **4.9× faster** than `starcoder2:instruct` with identical accuracy.
+
+---
+
+### By Language
+
+| Model | Python Exec% | Python Pass@1% | Java Exec% | Java Pass@1% |
+|---|---|---|---|---|
+| `qwen2.5-coder:7b` | **100%** | **95%** | 80% | 75% |
+| `deepseek-coder:6.7b-instruct` | 95% | **90%** | **85%** | **80%** |
+| `starcoder2:instruct` | **100%** | **95%** | 80% | 75% |
+
+All models perform substantially better in Python than Java. `deepseek-coder:6.7b-instruct` leads in Java correctness; `qwen2.5-coder:7b` and `starcoder2:instruct` are tied on Python.
+
+---
+
+### By Difficulty Level (all models combined, 120 total runs)
+
+| Difficulty | Tasks | Passes | Pass@1 Rate |
+|---|---|---|---|
+| Easy | 42 | 42 | **100.0%** |
+| Medium | 48 | 41 | **85.4%** |
+| Hard | 30 | 19 | **63.3%** |
+
+Easy tasks pose no challenge to any model. Performance degrades predictably with difficulty, dropping 22 percentage points from medium to hard.
+
+---
+
+### Generation Speed
+
+| Model | Avg. Time / Task | Total (40 tasks) | vs. Fastest |
+|---|---|---|---|
+| `qwen2.5-coder:7b` | **11.41 s** | 456 s | 1× (baseline) |
+| `deepseek-coder:6.7b-instruct` | 17.28 s | 691 s | 1.5× slower |
+| `starcoder2:instruct` | 55.50 s | 2220 s | 4.9× slower |
+
+`starcoder2:instruct` consistently generates much longer responses (reflecting more verbose reasoning), which explains the speed gap despite similar final accuracy.
+
+---
+
+### Failure Analysis
+
+**Tasks that fail for all three models:**
+
+| Task | Language | Category | Difficulty | Root Cause |
+|---|---|---|---|---|
+| Two Sum | Python | algorithms | medium | Wrong index ordering in edge cases |
+| Two Sum | Java | algorithms | medium | Wrong index ordering in edge cases |
+| Flatten List | Java | data_structures | hard | Recursive generics compilation error |
+| LRU Cache | Java | data_structures | hard | Complex OOP / LinkedHashMap usage |
+| Thread-Safe Counter | Java | concurrency | hard | AtomicInteger import / class structure |
+
+**Tasks where only 2 of 3 models succeed:**
+
+| Task | Language | Who fails |
+|---|---|---|
+| Word Frequency | Java | `qwen2.5-coder:7b` |
+| GCD and LCM of List | Java | `starcoder2:instruct` |
+| GCD and LCM of List | Python | `deepseek-coder:6.7b-instruct` |
+
+**Key observations:**
+- The **Two Sum** failure across all models in both languages suggests a systematic weakness in handling the edge case `[0, 4, 3, 0], target=0` where duplicate values and index ordering matter
+- All Java **hard data-structure and concurrency tasks** fail universally — models generate syntactically plausible but semantically incorrect class hierarchies
+- Java **easy and medium tasks** succeed at near-perfect rates, showing that the difficulty gap is specific to OOP complexity, not Java syntax in general
+
+---
+
 ## Reproducibility
 
 - Model temperature is fixed at **0.2** across all runs

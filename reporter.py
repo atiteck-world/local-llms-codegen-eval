@@ -109,7 +109,8 @@ def _aggregate(rows: list[dict]) -> list[dict]:
         exec_ok  = sum(1 for r in group if str(r["execution_success"]).lower() == "true")
         pass_ok  = sum(1 for r in group if str(r["pass_at_1"]).lower() == "true")
         gen_times = [float(r["generation_time_s"]) for r in group if r["generation_time_s"] not in ("", None)]
-        mem_vals  = [float(r["peak_memory_mb"])    for r in group if r["peak_memory_mb"]    not in ("", None)]
+        mem_vals  = [float(r["peak_memory_mb"])    for r in group
+                      if r["peak_memory_mb"] not in ("", None) and float(r["peak_memory_mb"]) > 0]
 
         summary.append({
             "model":                    model,

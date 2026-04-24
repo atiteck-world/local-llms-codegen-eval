@@ -169,8 +169,8 @@ def _run_single(model: str, task: dict) -> dict:
     }
 
     # ── 1. Generate code via Ollama ──────────────────────────────────────
-    prompt, prefix = ollama_client.build_prompt(task, model)
-    gen_result = ollama_client.generate(model, prompt, prefix=prefix)
+    prompt = ollama_client.build_prompt(task)
+    gen_result = ollama_client.generate(model, prompt)
 
     row["generation_time_s"] = gen_result["generation_time"]
 

@@ -307,9 +307,19 @@ public class Solution {{
 {_indent(tests_joined, 8)}
 
         System.out.println("RESULTS: " + _passed + "/" + _total);
-        Runtime rt = Runtime.getRuntime();
-        long usedBytes = rt.totalMemory() - rt.freeMemory();
-        System.out.printf("PEAK_MEMORY_MB: %.2f%n", usedBytes / (1024.0 * 1024.0));
+        // Read peak RSS (VmHWM) from /proc/self/status — accurate process-level memory
+        try {{
+            for (String _ln : java.nio.file.Files.readAllLines(java.nio.file.Paths.get("/proc/self/status"))) {{
+                if (_ln.startsWith("VmHWM:")) {{
+                    long _kb = Long.parseLong(_ln.replaceAll("[^0-9]", ""));
+                    System.out.printf("PEAK_MEMORY_MB: %.2f%n", _kb / 1024.0);
+                    break;
+                }}
+            }}
+        }} catch (Exception _ex) {{
+            Runtime _rt = Runtime.getRuntime();
+            System.out.printf("PEAK_MEMORY_MB: %.2f%n", (_rt.totalMemory() - _rt.freeMemory()) / (1024.0 * 1024.0));
+        }}
     }}
 }}
 """
